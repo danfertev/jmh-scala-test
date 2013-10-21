@@ -118,66 +118,76 @@ public class JavaBenchmark {
 //    public Object testSumVecWithSpect() {
 //        return ScalaBenchmark.testSumWithSpec();
 ////    }
+
 //    @GenerateMicroBenchmark
 //    @BenchmarkMode(Mode.AverageTime)
 //    @Fork(1)
 //    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 //    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 //    public boolean testIsSortedList() {
-//        return ScalaBenchmark.testIsSortedList(500000);
+//        return ScalaBenchmark.testIsSortedList(5000000);
 //    }
 
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.AverageTime)
     @Fork(1)
-    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
     public boolean testIsSortedArray_0toN() {
-        return ScalaBenchmark.testIsSortedArray_0toN(500000);
+        return ScalaBenchmark.testIsSortedArray_0toN(10000000);
     }
+
+//    @GenerateMicroBenchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Fork(1)
+//    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    public boolean testIsSortedArray2_0toN() {
+//        return ScalaBenchmark.testIsSortedArray2_0toN(10000000);
+//    }
+
+//    @GenerateMicroBenchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Fork(1)
+//    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    public boolean testIsSortedArray3_0toN() {
+//        return ScalaBenchmark.testIsSortedArray3_0toN(10000000);
+//    }
+
+//    @GenerateMicroBenchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Fork(1)
+//    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    public boolean testIsSortedArray_Nto0() {
+//        return ScalaBenchmark.testIsSortedArray_Nto0(10000000);
+//    }
+//
+//    @GenerateMicroBenchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Fork(1)
+//    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    public boolean testIsSortedArray2_Nto0() {
+//        return ScalaBenchmark.testIsSortedArray2_Nto0(10000000);
+//    }
+//
+//    @GenerateMicroBenchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Fork(1)
+//    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+//    public boolean testIsSortedArray3_Nto0() {
+//        return ScalaBenchmark.testIsSortedArray3_Nto0(10000000);
+//    }
 
     @GenerateMicroBenchmark
     @BenchmarkMode(Mode.AverageTime)
     @Fork(1)
-    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    public boolean testIsSortedArray2_0toN() {
-        return ScalaBenchmark.testIsSortedArray2_0toN(500000);
-    }
-
-    @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @Fork(1)
-    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    public boolean testIsSortedArray3_0toN() {
-        return ScalaBenchmark.testIsSortedArray3_0toN(500000);
-    }
-
-    @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @Fork(1)
-    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    public boolean testIsSortedArray_Nto0() {
-        return ScalaBenchmark.testIsSortedArray_Nto0(500000);
-    }
-
-    @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @Fork(1)
-    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    public boolean testIsSortedArray2_Nto0() {
-        return ScalaBenchmark.testIsSortedArray2_Nto0(500000);
-    }
-
-    @GenerateMicroBenchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @Fork(1)
-    @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    public boolean testIsSortedArray3_Nto0() {
-        return ScalaBenchmark.testIsSortedArray3_Nto0(500000);
+    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    public boolean testIsSorted_0toN() {
+        return ScalaBenchmark.testIsSorted(10000000);
     }
 }
