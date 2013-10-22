@@ -160,14 +160,14 @@ object ScalaBenchmark {
   import scala.concurrent.Await
   import scala.concurrent.duration._
 
-  def isSorted[A](xs: Seq[A], ord: (A, A) => Boolean): Future[Boolean] = {
+  def isSortedPar(xs: Array[Int], ord: (Int, Int) => Boolean): Future[Boolean] = {
     type Indexes = (Int, Int)
-    def slice: Seq[Indexes] = {
+    def slice: Array[Indexes] = {
       val factor = xs.size / 16
-      if (factor < 2) Seq()
+      if (factor < 2) Array()
       else {
         val ix = 0 until xs.size - 1 by factor
-        (if (ix.last != xs.size - 1) ix :+ (xs.size - 1) else ix).sliding(2).toSeq.map(i => (i(0), i(1)))
+        (if (ix.last != xs.size - 1) ix :+ (xs.size - 1) else ix).sliding(2).toArray.map(i => (i(0), i(1)))
       }
     }
 
@@ -178,7 +178,7 @@ object ScalaBenchmark {
       (n < 2) || step(n)
     }
 
-    def par(indexes: Seq[Indexes]): Seq[Future[Boolean]] = {
+    def par(indexes: Array[Indexes]): Array[Future[Boolean]] = {
       indexes map {
         ix => Future(isSliceSorted(ix))
       }
@@ -186,7 +186,7 @@ object ScalaBenchmark {
 
     val result = par(slice)
 
-    def track(fs: Seq[Future[Boolean]]): Future[Boolean] = {
+    def track(fs: Array[Future[Boolean]]): Future[Boolean] = {
       if (fs.isEmpty) Future(true)
       else {
         val first = Future.firstCompletedOf(result)
@@ -198,7 +198,43 @@ object ScalaBenchmark {
     track(result)
   }
 
-  def testIsSorted(n: Int) = {
-    Await.result(isSorted[Int]((0 to n).toArray, _ < _), 30.seconds)
+  def testIsSortedPar(n: Int) = {
+    Await.result(isSortedPar((0 to n).toArray, _ < _), 30.seconds)
   }
+
+  def testIsSortedParDi(n: Int) = {
+    Await.result(isSortedPar((0 to n).toArray), 30.seconds)
+  }
+
+  private val falseCondition = new RuntimeException("a")
+
+  def isSortedPar(xs: Array[Int]): Future[Boolean] = {
+    val size = xs.length
+    def loop(coords: Seq[(Int, Int)]): Future[Seq[Boolean]] = {
+      Future.traverse(coords) {
+        case (start, end) => Future {
+          check(start, end)
+        }
+      }
+    }
+    def check(start: Int, end: Int): Boolean = {
+      var ind = start
+      while (ind <= end) {
+        if (!(xs(ind) < xs(ind + 1))) throw falseCondition
+        ind = ind + 1
+      }
+      true
+    }
+    val indicies: Seq[(Int, Int)] = {
+      val b = size / 16
+
+      if (b < 10) {
+        val x = (0 to (size - 1) by b).sliding(2).toVector.map(is => (is(0), is(1)))
+        x.init :+(x.last._1, size - 1)
+      } else List((0, size - 1))
+    }
+    loop(indicies).map(_.forall(_ == true)).fallbackTo(Future successful false)
+  }
+
+
 }

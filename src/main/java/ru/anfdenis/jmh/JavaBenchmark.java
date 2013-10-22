@@ -7,8 +7,6 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Warmup;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -187,7 +185,16 @@ public class JavaBenchmark {
     @Fork(1)
     @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
     @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    public boolean testIsSorted_0toN() {
-        return ScalaBenchmark.testIsSorted(10000000);
+    public boolean testIsSortedPar() {
+        return ScalaBenchmark.testIsSortedPar(10000000);
+    }
+
+    @GenerateMicroBenchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @Fork(1)
+    @Warmup(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 20, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    public boolean testIsSortedParDi() {
+        return ScalaBenchmark.testIsSortedParDi(10000000);
     }
 }
