@@ -103,16 +103,6 @@ object ScalaBenchmark {
   }
 
 
-  def isSortedArray[A](as: Array[A], ord: (A, A) => Boolean): Boolean = {
-    val n = as.length
-    def step(k: Int): Boolean = {
-      if (k == 0) true
-      else if (ord(as(k - 1), as(k))) step(k - 1) else false
-    }
-    if (n < 2) true else step(n - 1)
-  }
-
-
   def isSortedArray2[A](xs: Array[A], ord: (A, A) => Boolean): Boolean = {
     val n = xs.length
     if (n <= 2) true
@@ -130,44 +120,32 @@ object ScalaBenchmark {
       k == 0
     }
   }
-
-  def testIsSortedArray_0toN(n: Int) = {
-    isSortedArray[Int]((0 to n).toArray, _ - _ < 0)
-  }
-
-  def testIsSortedArray2_0toN(n: Int) = {
-    isSortedArray2[Int]((0 to n).toArray, _ - _ < 0)
-  }
-
-  def testIsSortedArray3_0toN(n: Int) = {
-    isSortedArray3[Int]((0 to n).toArray, _ - _ < 0)
-  }
-
-  def testIsSortedArray_Nto0(n: Int) = {
-    isSortedArray[Int]((n to 0 by -1).toArray, _ - _ > 0)
-  }
-
-  def testIsSortedArray2_Nto0(n: Int) = {
-    isSortedArray2[Int]((n to 0 by -1).toArray, _ - _ > 0)
-  }
-
-  def testIsSortedArray3_Nto0(n: Int) = {
-    isSortedArray3[Int]((n to 0 by -1).toArray, _ - _ > 0)
-  }
+  val n = 10000000
+  val array = (1 to n).toArray
 
   import scala.concurrent.Future
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.Await
   import scala.concurrent.duration._
 
+  def isSorted(as: Array[Int], ord: (Int, Int) => Boolean): Boolean = {
+    val n = as.length
+    def step(k: Int): Boolean = {
+      if (k == 0) true
+      else if (ord(as(k - 1), as(k))) step(k - 1) else false
+    }
+    if (n < 2) true else step(n - 1)
+  }
+
   def isSortedPar(xs: Array[Int], ord: (Int, Int) => Boolean): Future[Boolean] = {
+    val size = xs.size
     type Indexes = (Int, Int)
     def slice: Array[Indexes] = {
-      val factor = xs.size / 16
-      if (factor < 2) Array()
+      val factor = size / 32
+      if (factor < 2) Array((0, size - 1))
       else {
-        val ix = 0 until xs.size - 1 by factor
-        (if (ix.last != xs.size - 1) ix :+ (xs.size - 1) else ix).sliding(2).toArray.map(i => (i(0), i(1)))
+        val ix = 0 until size - 1 by factor
+        (if (ix.last != size - 2 || ix.last == size -1) ix :+ (size - 2) else ix).sliding(2).toArray.map(i => (i(0), i(1)))
       }
     }
 
@@ -175,7 +153,7 @@ object ScalaBenchmark {
       val (start, end) = ix
       val n = end - start
       def step(k: Int): Boolean = (k == 0) || (ord(xs(k - 1), xs(k)) && step(k - 1))
-      (n < 2) || step(n)
+      (n < 2) || step(n + 1)
     }
 
     def par(indexes: Array[Indexes]): Array[Future[Boolean]] = {
@@ -198,42 +176,42 @@ object ScalaBenchmark {
     track(result)
   }
 
-  def testIsSortedPar(n: Int) = {
-    Await.result(isSortedPar((0 to n).toArray, _ < _), 30.seconds)
-  }
-
-  def testIsSortedParDi(n: Int) = {
-    Await.result(isSortedParDi((0 to n).toArray), 30.seconds)
-  }
-
-  private val falseCondition = new RuntimeException("a")
-
-  def isSortedParDi(xs: Array[Int]): Future[Boolean] = {
-    val size = xs.length
+  def isSortedParDi(xs: Array[Int], size: Int): Future[Boolean] = {
     def loop(coords: Seq[(Int, Int)]): Future[Seq[Boolean]] = {
-      Future.traverse(coords) {
-        case (start, end) => Future {
-          check(start, end)
-        }
-      }
+      Future.sequence(coords map { case (start: Int, end: Int) =>
+        Future(check(start, end))
+      })
     }
     def check(start: Int, end: Int): Boolean = {
       var ind = start
-      while (ind <= end) {
-        if (!(xs(ind) < xs(ind + 1))) throw falseCondition
+      var res = true
+      while (ind < end) {
+        if (xs(ind) > xs(ind + 1)) res = false
         ind = ind + 1
       }
-      true
+      res
     }
     val indicies: Seq[(Int, Int)] = {
       val b = size / 16
 
-      if (b < 10) {
-        val x = (0 to (size - 1) by b).sliding(2).toVector.map(is => (is(0), is(1)))
-        x.init :+(x.last._1, size - 1)
-      } else List((0, size - 1))
+      if (b > 10) {
+        val x = (0 until (size - 1) by b ).sliding(2).toVector.map(is => (is(0), is(1)))
+        x.init :+(x.last._1, size - 2)
+      } else List((0, size - 2))
     }
-    loop(indicies).map(_.forall(_ == true)).fallbackTo(Future successful false)
+    loop(indicies).map(_.forall(_ == true))
+  }
+
+  def testIsSorted = {
+    Await.result(Future(isSorted(array, _ < _)), 30.seconds)
+  }
+
+  def testIsSortedPar = {
+    Await.result(isSortedPar(array, _ < _), 30.seconds)
+  }
+
+  def testIsSortedParDi = {
+    Await.result(isSortedParDi(array, n), 30.seconds)
   }
 
 
