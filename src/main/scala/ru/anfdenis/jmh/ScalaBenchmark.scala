@@ -203,12 +203,12 @@ object ScalaBenchmark {
   }
 
   def testIsSortedParDi(n: Int) = {
-    Await.result(isSortedPar((0 to n).toArray), 30.seconds)
+    Await.result(isSortedParDi((0 to n).toArray), 30.seconds)
   }
 
   private val falseCondition = new RuntimeException("a")
 
-  def isSortedPar(xs: Array[Int]): Future[Boolean] = {
+  def isSortedParDi(xs: Array[Int]): Future[Boolean] = {
     val size = xs.length
     def loop(coords: Seq[(Int, Int)]): Future[Seq[Boolean]] = {
       Future.traverse(coords) {
