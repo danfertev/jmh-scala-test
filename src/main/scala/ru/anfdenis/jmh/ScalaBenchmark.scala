@@ -120,6 +120,7 @@ object ScalaBenchmark {
       k == 0
     }
   }
+
   val n = 10000000
   val array = (1 to n).toArray
 
@@ -139,24 +140,28 @@ object ScalaBenchmark {
 
   def isSortedPar(xs: Array[Int], ord: (Int, Int) => Boolean): Future[Boolean] = {
     val size = xs.size
-    type Indexes = (Int, Int)
-    def slice: Array[Indexes] = {
+    type Index = (Int, Int)
+    def slice: Array[Index] = {
       val factor = size / 32
-      if (factor < 2) Array((0, size - 1))
+      if (factor < 2) Array((0, size - 2))
       else {
         val ix = 0 until size - 1 by factor
-        (if (ix.last != size - 2 || ix.last == size -1) ix :+ (size - 2) else ix).sliding(2).toArray.map(i => (i(0), i(1)))
+        (if (ix.last != size - 2 || ix.last == size - 1) ix :+ (size - 2) else ix).sliding(2).toArray.map(i => (i(0), i(1)))
       }
     }
 
-    def isSliceSorted(ix: Indexes) = {
+    def isSliceSorted(ix: Index) = {
       val (start, end) = ix
-      val n = end - start
-      def step(k: Int): Boolean = (k == 0) || (ord(xs(k - 1), xs(k)) && step(k - 1))
-      (n < 2) || step(n + 1)
+      var res = true
+      var i = start
+      while (i <= end && res) {
+        if (!ord(xs(i), xs(i + 1))) res = false
+        i += 1
+      }
+      res
     }
 
-    def par(indexes: Array[Indexes]): Array[Future[Boolean]] = {
+    def par(indexes: Array[Index]): Array[Future[Boolean]] = {
       indexes map {
         ix => Future(isSliceSorted(ix))
       }
@@ -178,8 +183,9 @@ object ScalaBenchmark {
 
   def isSortedParDi(xs: Array[Int], size: Int): Future[Boolean] = {
     def loop(coords: Seq[(Int, Int)]): Future[Seq[Boolean]] = {
-      Future.sequence(coords map { case (start: Int, end: Int) =>
-        Future(check(start, end))
+      Future.sequence(coords map {
+        case (start: Int, end: Int) =>
+          Future(check(start, end))
       })
     }
     def check(start: Int, end: Int): Boolean = {
@@ -195,7 +201,7 @@ object ScalaBenchmark {
       val b = size / 16
 
       if (b > 10) {
-        val x = (0 until (size - 1) by b ).sliding(2).toVector.map(is => (is(0), is(1)))
+        val x = (0 until (size - 1) by b).sliding(2).toVector.map(is => (is(0), is(1)))
         x.init :+(x.last._1, size - 2)
       } else List((0, size - 2))
     }
